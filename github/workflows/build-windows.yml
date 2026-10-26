@@ -1,0 +1,30 @@
+name: Build Velvet Verb (Windows VST3)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurer
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64
+
+      - name: Compiler
+        run: cmake --build build --config Release --target VelvetVerb_VST3 --parallel
+
+      - name: Preparer le dossier
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item -Recurse "build/VelvetVerb_artefacts/Release/VST3/Velvet Verb.vst3" "dist/Velvet Verb.vst3"
+          Copy-Item "LISEZMOI.md" "dist/LISEZMOI.md"
+
+      - name: Telecharger le plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: VelvetVerb-VST3-Windows
+          path: dist
